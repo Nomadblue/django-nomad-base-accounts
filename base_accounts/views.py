@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from django.views.generic import FormView
+from django.views.generic import View, FormView
 from django.views.generic.base import RedirectView
-# from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
 from django.contrib import messages
@@ -18,7 +17,7 @@ from base_accounts.utils import create_email_user, UserAlreadyExists
 class SignupFormView(FormView):
     form_class = SignupForm
     template_name = 'accounts/signup.html'
-    success_url = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+    success_url = getattr(settings, 'BASE_ACCOUNTS_SIGNUP_REDIRECT_URL', '/')
 
     def get_success_url(self):
         if self.request.POST.get('next'):
@@ -56,7 +55,7 @@ class SignupFormView(FormView):
 class LoginFormView(FormView):
     form_class = LoginForm
     template_name = 'accounts/login.html'
-    success_url = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+    success_url = getattr(settings, 'BASE_ACCOUNTS_LOGIN_REDIRECT_URL', '/')
 
     def get_success_url(self):
         if self.request.POST.get('next'):
@@ -85,7 +84,7 @@ class LoginFormView(FormView):
 
 
 class PostLoginRedirectView(RedirectView):
-    success_url = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+    success_url = getattr(settings, 'BASE_ACCOUNTS_POST_LOGIN_REDIRECT_URL', '/')
 
     def dispatch(self, request, *args, **kwargs):
         if self.request.GET.get('next'):
@@ -132,8 +131,7 @@ class UpdatePasswordFormView(FormView):
         return redirect('settings')
 
 
-class LogoutView(RedirectView):
-    success_url = getattr(settings, 'LOGIN_REDIRECT_URL', '/')
+class LogoutView(View):
 
     def dispatch(self, request, *args, **kwargs):
         user = request.user
@@ -141,5 +139,6 @@ class LogoutView(RedirectView):
             user.first_login = False
             user.save(update_fields=['first_login'])
         logout(request)
-        return super(LogoutView, self).dispatch(request, *args, **kwargs)
+        success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', '/')
+        return redirect(success_url)
 
