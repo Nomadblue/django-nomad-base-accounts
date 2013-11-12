@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+Version 2.0.0
+=============
+
+* Backwards-incompatible changes on CBV
+* Add default templates
+
 Version 1.1.0
 =============
 
