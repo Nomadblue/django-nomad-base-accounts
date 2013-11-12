@@ -22,4 +22,3 @@ class BaseUser(AbstractUser):
 
     def get_display_name(self):
         return self.name or self.username
-

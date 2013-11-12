@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <p>Current email: {{ user.email }}</p>
+  <form action="." method="post" accept-charset="utf-8">
+    {% csrf_token %}
+    <ul>
+      {{ form.as_ul }}
+    <ul>
+    <p><input type="submit" value="Update Email"></p>
+  </form>
+</div>
+{% endblock %}

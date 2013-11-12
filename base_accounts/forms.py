@@ -35,8 +35,8 @@ class UpdateEmailForm(forms.Form):
 
 
 class UpdatePasswordForm(forms.Form):
-    password1 = forms.CharField( label=_('new password'), widget=forms.PasswordInput,)
-    password2 = forms.CharField( label=_('new password (confirm)'), widget=forms.PasswordInput,)
+    password1 = forms.CharField(label=_('new password'), widget=forms.PasswordInput,)
+    password2 = forms.CharField(label=_('new password (confirm)'), widget=forms.PasswordInput,)
 
     def __init__(self, *args, **kwargs):
         request = kwargs.pop('request', None)
@@ -54,4 +54,3 @@ class UpdatePasswordForm(forms.Form):
         self.user.set_password(self.cleaned_data['password1'])
         user_model = get_user_model()
         user_model.objects.filter(pk=self.user.pk).update(password=self.user.password)
-
