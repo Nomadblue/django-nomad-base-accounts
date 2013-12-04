@@ -3,15 +3,47 @@
 from django.views.generic import View, FormView
 from django.views.generic.base import RedirectView
 from django.contrib.auth import login, authenticate, logout
-from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from django.core.urlresolvers import reverse_lazy
-from django.contrib.messages.views import SuccessMessageMixin
 
 from base_accounts.forms import SignupForm, LoginForm, UpdateEmailForm, UpdatePasswordForm
 from base_accounts.utils import create_email_user, UserAlreadyExists
+
+
+try:
+    from django.contrib.messages.views import SuccessMessageMixin
+except:
+    # This mixin was added to Django 1.6, we define it for backwards compatibility
+    from django.contrib import messages
+
+    class SuccessMessageMixin(object):
+        """
+        Adds a success message on successful form submission.
+        """
+        success_message = ''
+
+        def form_valid(self, form):
+            response = super(SuccessMessageMixin, self).form_valid(form)
+            success_message = self.get_success_message(form.cleaned_data)
+            if success_message:
+                messages.success(self.request, success_message)
+            return response
+
+        def get_success_message(self, cleaned_data):
+            return self.success_message % cleaned_data
+
+
+class ErrorMessageRedirectMixin(object):
+    """Redirect to error url if exists, converting form error strs to sys msgs"""
+
+    def form_invalid(self, form):
+        if self.error_url:
+            for msg in form.errors.values():
+                messages.error(self.request, _(msg[0]))
+            return redirect(self.error_url)
+        return super(ErrorMessageRedirectMixin, self).form_invalid(form)
 
 
 class NextRedirectMixin(object):
@@ -31,7 +63,7 @@ class NextRedirectMixin(object):
 class SignupFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
     form_class = SignupForm
     template_name = 'base_accounts/signup.html'
-    success_url = getattr(settings, 'BASE_ACCOUNTS_SIGNUP_REDIRECT_URL', '/')
+    success_url = getattr(settings, 'BASE_ACCOUNTS_SIGNUP_REDIRECT_URL', settings.LOGIN_REDIRECT_URL)
     success_message = _("Welcome!")
 
     def form_valid(self, form):
@@ -60,7 +92,7 @@ class SignupFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
 class LoginFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
     form_class = LoginForm
     template_name = 'base_accounts/login.html'
-    success_url = getattr(settings, 'BASE_ACCOUNTS_LOGIN_REDIRECT_URL', '/')
+    success_url = getattr(settings, 'BASE_ACCOUNTS_LOGIN_REDIRECT_URL', settings.LOGIN_REDIRECT_URL)
     success_message = _("You have logged in")
 
     def form_valid(self, form):
@@ -83,11 +115,12 @@ class LoginFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
         return super(LoginFormView, self).form_valid(form)
 
 
-class UpdateEmailFormView(SuccessMessageMixin, FormView):
+class UpdateEmailFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, FormView):
     """Updates user model with new provided email"""
     form_class = UpdateEmailForm
     template_name = 'base_accounts/update_email.html'
-    success_url = reverse_lazy('settings_update_email')
+    success_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_EMAIL_REDIRECT_URL', reverse_lazy('settings_update_email'))
+    error_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_EMAIL_ERROR_REDIRECT_URL', '')
     success_message = _('You have updated your email successfully')
 
     def get_form_kwargs(self):
@@ -102,11 +135,12 @@ class UpdateEmailFormView(SuccessMessageMixin, FormView):
         return super(UpdateEmailFormView, self).form_valid(form)
 
 
-class UpdatePasswordFormView(SuccessMessageMixin, FormView):
+class UpdatePasswordFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, FormView):
     """Updates user model with new provided password"""
     form_class = UpdatePasswordForm
     template_name = 'base_accounts/update_password.html'
-    success_url = reverse_lazy('settings_update_password')
+    success_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_PASSWORD_REDIRECT_URL', reverse_lazy('settings_update_password'))
+    error_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_PASSWORD_ERROR_REDIRECT_URL', '')
     success_message = _('You have updated your password successfully')
 
     def get_form_kwargs(self):
@@ -123,8 +157,8 @@ class UpdatePasswordFormView(SuccessMessageMixin, FormView):
 
 
 class PostLoginRedirectView(RedirectView):
-    """Used by social login flows"""
-    success_url = getattr(settings, 'BASE_ACCOUNTS_POST_LOGIN_REDIRECT_URL', '/')
+    """Used by social login flows (e.g. OAuth)"""
+    success_url = getattr(settings, 'BASE_ACCOUNTS_POST_LOGIN_REDIRECT_URL', settings.LOGIN_REDIRECT_URL)
 
     def dispatch(self, request, *args, **kwargs):
         """Override post-logout url if provided"""
@@ -134,6 +168,7 @@ class PostLoginRedirectView(RedirectView):
 
 
 class LogoutView(View):
+    """Updates User.first_login field before logout"""
 
     def dispatch(self, request, *args, **kwargs):
         user = request.user
@@ -141,5 +176,5 @@ class LogoutView(View):
             user.first_login = False
             user.save(update_fields=['first_login'])
         logout(request)
-        success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', '/')
+        success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', settings.LOGOUT_URL)
         return redirect(success_url)
