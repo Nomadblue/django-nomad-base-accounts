@@ -176,5 +176,5 @@ class LogoutView(View):
             user.first_login = False
             user.save(update_fields=['first_login'])
         logout(request)
-        success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', settings.LOGOUT_URL)
+        success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', '/')
         return redirect(success_url)
