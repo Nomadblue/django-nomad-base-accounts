@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.views.generic import View, FormView
-from django.views.generic.base import RedirectView
 from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import redirect
 from django.utils.translation import ugettext as _
@@ -12,11 +11,11 @@ from base_accounts.forms import SignupForm, LoginForm, UpdateEmailForm, UpdatePa
 from base_accounts.utils import create_email_user, UserAlreadyExists
 
 
+from django.contrib import messages
 try:
     from django.contrib.messages.views import SuccessMessageMixin
 except:
     # This mixin was added to Django 1.6, we define it for backwards compatibility
-    from django.contrib import messages
 
     class SuccessMessageMixin(object):
         """
@@ -156,19 +155,22 @@ class UpdatePasswordFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, For
         return super(UpdatePasswordFormView, self).form_valid(form)
 
 
-class PostLoginRedirectView(RedirectView):
+class PostLoginRedirectView(SuccessMessageMixin, View):
     """Used by social login flows (e.g. OAuth)"""
     success_url = getattr(settings, 'BASE_ACCOUNTS_POST_LOGIN_REDIRECT_URL', settings.LOGIN_REDIRECT_URL)
+    success_message = _("You have logged in")
 
     def dispatch(self, request, *args, **kwargs):
-        """Override post-logout url if provided"""
+        """Override post-login url if provided"""
         if self.request.GET.get('next'):
-            self.url = self.request.GET.get('next')
-        return super(PostLoginRedirectView, self).dispatch(request, *args, **kwargs)
+            self.success_url = self.request.GET.get('next')
+        messages.success(self.request, self.success_message)
+        return redirect(self.success_url)
 
 
 class LogoutView(View):
     """Updates User.first_login field before logout"""
+    success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', '/')
 
     def dispatch(self, request, *args, **kwargs):
         user = request.user
@@ -176,5 +178,4 @@ class LogoutView(View):
             user.first_login = False
             user.save(update_fields=['first_login'])
         logout(request)
-        success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', '/')
-        return redirect(success_url)
+        return redirect(self.success_url)
