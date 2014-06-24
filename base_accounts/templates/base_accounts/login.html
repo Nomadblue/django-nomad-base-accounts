@@ -1,13 +1,36 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="container">
-  <form action="." method="post" accept-charset="utf-8">
-    {% csrf_token %}
-    <ul>
-      {{ form.as_ul }}
-    <ul>
-    <p><input type="submit" value="Log In"></p>
-  </form>
+  <div class="row">
+    <h1>Login</h1>
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+      <form method="post" accept-charset="utf-8" role="form" action="{% url 'login' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% for error in form.non_field_errors %}
+          <p class="error-small"></span>{{ error }}</span></p>
+        {% endfor %}
+
+        <input id="id_email" value="{{ form.email.value|default:'' }}" name="email" type="email" class="form-control input-lg {% if form.email.errors %}error{% endif %}" placeholder="your@email.com">
+        {% for error in form.email.errors %}
+          <p class="error-small"></span>{{ error }}</span></p>
+        {% endfor %}
+
+        <input id="id_password" value="{{ form.password.value|default:'' }}" name="password" type="password" class="form-control input-lg {% if form.password.errors %}error{% endif %}" placeholder="Your password">
+        {% for error in form.password.errors %}
+          <p class="error-small"></span>{{ error }}</span></p>
+        {% endfor %}
+
+        <p><input type="submit" class="btn btn-lg btn-block btn-primary" value="Login"></p>
+      </form>
+      <a href="{% url 'signup' %}{% if next %}?next={{ next }}{% endif %}">Don't have an account?</a>
+      {% comment %}
+      <a class="pull-right" href="{% url 'password_reset_recover' %}">Forgot my password!</a>
+      {% endcomment %}
+    </div>
+  </div>
 </div>
+
 {% endblock %}

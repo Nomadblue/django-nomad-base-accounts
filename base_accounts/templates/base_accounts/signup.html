@@ -1,14 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="container">
-  <form action="." method="post" accept-charset="utf-8">
-    {% csrf_token %}
-    <ul>
-      {{ form.as_ul }}
-    </ul>
-    <input type="hidden" name="next" value="{{ next }}" id="next">
-    <p><input type="submit" value="Sign Up"></p>
-  </form>
+  <div class="row">
+    <h1>Signup</h1>
+    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+
+      <form action="{% url 'signup' %}" method="post" accept-charset="utf-8" role="form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% for error in form.non_field_errors %}
+          <p class="error-small"></span>{{ error }}</span></p>
+        {% endfor %}
+
+        <input id="id_full_name" value="{{ form.full_name.value|default:'' }}" name="full_name" type="text" class="form-control input-lg {% if form.full_name.errors %}error{% endif %}" placeholder="Your full name" required>
+        {% for error in form.full_name.errors %}
+          <p class="error-small"></span>{{ error }}</span></p>
+        {% endfor %}
+
+        <input id="id_email" value="{{ form.email.value|default:'' }}" name="email" type="email" class="form-control input-lg {% if form.email.errors %}error{% endif %}" placeholder="your@email.com" required>
+        {% for error in form.email.errors %}
+          <p class="error-small"></span>{{ error }}</span></p>
+        {% endfor %}
+        <input id="id_password" value="{{ form.password.value|default:'' }}" name="password" type="password" class="form-control input-lg {% if form.password.errors %}error{% endif %}" placeholder="Your password" required>
+        {% for error in form.password.errors %}
+          <p class="error-small"></span>{{ error }}</span></p>
+        {% endfor %}
+
+        <input id="id_tos" type="checkbox" name="tos">&nbsp;&nbsp;<label for="tos">I accept the <a href="#" data-toggle="modal" data-target="#tosModal">Terms and conditions</a></label>
+        {% for error in form.tos.errors %}
+          <p class="error-small clearfix"><span>You must agree to the terms and conditions</span></p>
+        {% endfor %}
+
+        <p><input type="submit" class="btn btn-lg btn-block btn-primary" value="Signup"></p>
+      </form>
+      <a href="{% url 'login' %}{% if next %}?next={{ next }}{% endif %}">Already registered?</a>
+
+    </div>
+  </div>
 </div>
+
 {% endblock %}
