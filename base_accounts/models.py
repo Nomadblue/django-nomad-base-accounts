@@ -14,10 +14,19 @@ class BaseUser(AbstractUser):
         abstract = True
 
     def save(self, *args, **kwargs):
+
+        # Create slug from username. Altough field is not unique at database
+        # level, it will be as long as username stays unique as well.
         if not self.id:
             self.slug = slugify(self.username)
+
+        # Assign username as name if empty
         if not self.name.strip():
-            self.name = "%s %s" % (self.first_name, self.last_name)
+            if not self.first_name:
+                self.first_name = self.username
+            name = "%s %s" % (self.first_name, self.last_name)
+            self.name = name.strip()
+
         super(BaseUser, self).save(*args, **kwargs)
 
     def get_display_name(self):
