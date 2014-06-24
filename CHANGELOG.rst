@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+Version 2.2.0
+=============
+
+* Add spanish translations
+
 Version 2.0.0
 =============
 
