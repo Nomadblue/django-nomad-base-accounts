@@ -1,4 +1,5 @@
 from django.db import models
+from django.core import signing
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
@@ -9,6 +10,7 @@ class BaseUser(AbstractUser):
     name = models.CharField(_('name'), max_length=255, blank=True)
     first_login = models.BooleanField(_('first login'), default=True)
     image = models.ImageField(_('image'), blank=True, null=True, upload_to="images/avatars/%Y/%m/%d", max_length=255)
+    confirmed = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -31,3 +33,6 @@ class BaseUser(AbstractUser):
 
     def get_display_name(self):
         return self.name or self.username
+
+    def get_confirmation_token(self):
+        return signing.dumps(self.pk)

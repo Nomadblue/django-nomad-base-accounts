@@ -16,7 +16,7 @@ def unique_username(src, counter):
     username = '%s%s' % (src.split('@', 1)[0][:30 - len(suffix_num)], counter)
     return username[:30]
 
-def create_email_user(email, password):
+def create_email_user(email, password, **extrafields):
     """
     If the email does not exist, create a new one. Additionally,
     if the password has not been supplied, assign a random one.
@@ -30,7 +30,7 @@ def create_email_user(email, password):
         username = unique_username(email, obj_count)
         if password is None:
             password = user_model.objects.make_random_password()
-        user = user_model.objects.create_user(username, email, password)
+        user = user_model.objects.create_user(username, email, password, **extrafields)
         return user
     else:
         raise UserAlreadyExists

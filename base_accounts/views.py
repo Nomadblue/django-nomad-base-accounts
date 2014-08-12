@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from django.views.generic import View, FormView
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate, logout
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import ugettext as _
+from django.utils.timezone import now
 from django.conf import settings
+from django.http import Http404
+from django.core import signing
 from django.core.urlresolvers import reverse_lazy
 
 from base_accounts.forms import SignupForm, LoginForm, UpdateEmailForm, UpdatePasswordForm
@@ -179,3 +183,48 @@ class LogoutView(View):
             user.save(update_fields=['first_login'])
         logout(request)
         return redirect(self.success_url)
+
+
+class ConfirmEmailAddress(View):
+    """Confirms user's email address"""
+
+    def dispatch(self, request, *args, **kwargs):
+        from ipdb import set_trace; set_trace()
+        pass
+
+def confirm_email_address(request, token):
+    try:
+        pk = signing.loads(token, max_age=3600 * 48)
+    except signing.BadSignature:
+        raise Http404
+    user = get_object_or_404(get_user_model(), pk=pk)
+
+    if user.confirmed:  # make migration here
+        raise Http404
+
+    user.confirmed = now()
+    user.save()
+
+    if request.user != user:
+        logout(request)
+
+    if not request.user.is_authenticated():
+        user.backend = 'django.contrib.auth.backends.ModelBackend'
+        login(request, user)
+
+    if user.is_active:
+        messages.success(request, 'You have confirmed your email address')
+        return redirect('settings')
+    else:
+        messages.success(request, 'Please confirm your email address')
+        return redirect('password_reset_recover')
+
+
+@login_required
+def resend_email_confirmation(request):
+    user = request.user
+    if user.confirmed:
+        raise Http404
+    EmailConfirmationNotification.objects.create(user=user, obj=user) ### !!!!FIOXFDSJFSDKFJ SDFsd FJSDKF JSDK
+    messages.success(request, "We have sent a new confirmation email to %s" % user.email)
+    return redirect(reverse('settings'))

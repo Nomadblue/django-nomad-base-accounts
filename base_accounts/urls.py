@@ -10,5 +10,6 @@ urlpatterns = patterns(
     url(r'^signup/$', SignupFormView.as_view(), name='signup'),
     url(r'^settings/email/$', login_required(UpdateEmailFormView.as_view()), name='settings_update_email'),
     url(r'^settings/password/$', login_required(UpdatePasswordFormView.as_view()), name='settings_update_password'),
+    url(r'^confirm/(?P<token>.+)', 'confirm_email_address', name='confirm_email_address'),
     url(r'^logout/$', login_required(LogoutView.as_view()), name="logout"),
 )
