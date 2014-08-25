@@ -2,7 +2,14 @@
 
 {% block content %}
 <div class="container">
+
+  {% if not user.confirmed %}
+    <p>Your email hasn't been confirmed yet. Please click he link below that will send you an email with instructions on how to proceed. It will take you only one minute and it is important to us in order to make sure you are receiving our notifications and communications correctly. Thanks!</p>
+    <p><a href="{% url 'send_email_confirmation' %}">Send email confirmation</a></p>
+  {% endif %}
+
   <p>Current email: {{ user.email }}</p>
+
   <form action="." method="post" accept-charset="utf-8">
     {% csrf_token %}
     <ul>
@@ -10,5 +17,6 @@
     <ul>
     <p><input type="submit" value="Update Email"></p>
   </form>
+
 </div>
 {% endblock %}

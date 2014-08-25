@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.views.generic import View, FormView
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import ugettext as _
@@ -10,6 +9,7 @@ from django.conf import settings
 from django.http import Http404
 from django.core import signing
 from django.core.urlresolvers import reverse_lazy
+from django.contrib.auth import get_user_model
 
 from base_accounts.forms import SignupForm, LoginForm, UpdateEmailForm, UpdatePasswordForm
 from base_accounts.utils import create_email_user, UserAlreadyExists
@@ -134,7 +134,8 @@ class UpdateEmailFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, FormVi
 
     def form_valid(self, form):
         self.request.user.email = form.cleaned_data.get('email')
-        self.request.user.save(update_fields=['email'])
+        self.request.user.confirmed = None
+        self.request.user.save()
         return super(UpdateEmailFormView, self).form_valid(form)
 
 
@@ -188,18 +189,15 @@ class LogoutView(View):
 class ConfirmEmailAddress(View):
     """Confirms user's email address"""
 
-    def dispatch(self, request, *args, **kwargs):
-        from ipdb import set_trace; set_trace()
-        pass
 
 def confirm_email_address(request, token):
     try:
-        pk = signing.loads(token, max_age=3600 * 48)
+        pk = signing.loads(token, max_age=3600 * 48, salt='resend_email_confirmation')
     except signing.BadSignature:
         raise Http404
     user = get_object_or_404(get_user_model(), pk=pk)
 
-    if user.confirmed:  # make migration here
+    if user.confirmed:
         raise Http404
 
     user.confirmed = now()
@@ -214,17 +212,7 @@ def confirm_email_address(request, token):
 
     if user.is_active:
         messages.success(request, 'You have confirmed your email address')
-        return redirect('settings')
+        return redirect('settings_update_email')
     else:
         messages.success(request, 'Please confirm your email address')
         return redirect('password_reset_recover')
-
-
-@login_required
-def resend_email_confirmation(request):
-    user = request.user
-    if user.confirmed:
-        raise Http404
-    EmailConfirmationNotification.objects.create(user=user, obj=user) ### !!!!FIOXFDSJFSDKFJ SDFsd FJSDKF JSDK
-    messages.success(request, "We have sent a new confirmation email to %s" % user.email)
-    return redirect(reverse('settings'))
