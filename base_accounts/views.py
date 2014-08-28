@@ -133,9 +133,11 @@ class UpdateEmailFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, FormVi
         return kwargs
 
     def form_valid(self, form):
-        self.request.user.email = form.cleaned_data.get('email')
-        self.request.user.confirmed = None
-        self.request.user.save()
+        new_email = form.cleaned_data.get('email')
+        if self.request.user.email != new_email:
+            self.request.user.email = new_email
+            self.request.user.confirmed = None
+            self.request.user.save()
         return super(UpdateEmailFormView, self).form_valid(form)
 
 
