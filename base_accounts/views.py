@@ -213,8 +213,8 @@ def confirm_email_address(request, token):
         login(request, user)
 
     if user.is_active:
-        messages.success(request, 'You have confirmed your email address')
+        messages.success(request, _('You have confirmed your email address'))
         return redirect('settings_update_email')
     else:
-        messages.success(request, 'Please confirm your email address')
+        messages.success(request, _('Please confirm your email address'))
         return redirect('password_reset_recover')
