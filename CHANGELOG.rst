@@ -2,7 +2,13 @@
 CHANGELOG
 =========
 
-Version 2.2.0
+Version 2.3.0
+=============
+
+* Add email confirmation capabilities
+* Fix documentation
+
+Version 2.2.1
 =============
 
 * Add spanish translations

@@ -17,12 +17,13 @@ class BaseUser(AbstractUser):
 
     def save(self, *args, **kwargs):
 
-        # Create slug from username. Altough field is not unique at database
-        # level, it will be as long as username stays unique as well.
+        # Create slug from username. Although ``BaseUser.slug`` field is not
+        # unique at database level, it will be unique as long as
+        # ``AbstractUser.username`` stays unique as well.
         if not self.id:
             self.slug = slugify(self.username)
 
-        # Assign username as name if empty
+        # Assign ``AbstractUser.username`` as ``BaseUser.name`` if empty
         if not self.name.strip():
             if not self.first_name:
                 self.first_name = self.username

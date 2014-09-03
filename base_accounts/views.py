@@ -123,7 +123,7 @@ class UpdateEmailFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, FormVi
     form_class = UpdateEmailForm
     template_name = 'base_accounts/update_email.html'
     success_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_EMAIL_REDIRECT_URL', reverse_lazy('settings_update_email'))
-    error_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_EMAIL_ERROR_REDIRECT_URL', '')
+    error_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_EMAIL_ERROR_REDIRECT_URL', reverse_lazy('settings_update_email'))
     success_message = _('You have updated your email successfully')
 
     def get_form_kwargs(self):
@@ -146,7 +146,7 @@ class UpdatePasswordFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, For
     form_class = UpdatePasswordForm
     template_name = 'base_accounts/update_password.html'
     success_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_PASSWORD_REDIRECT_URL', reverse_lazy('settings_update_password'))
-    error_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_PASSWORD_ERROR_REDIRECT_URL', '')
+    error_url = getattr(settings, 'BASE_ACCOUNTS_UPDATE_PASSWORD_ERROR_REDIRECT_URL', reverse_lazy('settings_update_password'))
     success_message = _('You have updated your password successfully')
 
     def get_form_kwargs(self):
@@ -188,11 +188,8 @@ class LogoutView(View):
         return redirect(self.success_url)
 
 
-class ConfirmEmailAddress(View):
-    """Confirms user's email address"""
-
-
 def confirm_email_address(request, token):
+    """Confirms user's email address"""
     try:
         pk = signing.loads(token, max_age=3600 * 48, salt='resend_email_confirmation')
     except signing.BadSignature:
