@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+Version 2.3.1
+=============
+
+* Move auth validations to form cleaning methods, avoid redirect on error
+* Fix next param so invalid forms submissions don't lose proper redirections
+
 Version 2.3.0
 =============
 
