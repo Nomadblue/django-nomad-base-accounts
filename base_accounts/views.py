@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth import get_user_model
 
 from base_accounts.forms import SignupForm, LoginForm, UpdateEmailForm, UpdatePasswordForm
-from base_accounts.utils import create_email_user, UserAlreadyExists
+from base_accounts.utils import create_email_user
 
 
 from django.contrib import messages
@@ -59,7 +59,7 @@ class NextRedirectMixin(object):
 
     def get_context_data(self, **kwargs):
         ctxt = super(NextRedirectMixin, self).get_context_data(**kwargs)
-        ctxt['next'] = self.request.GET.get('next') or ''
+        ctxt['next'] = self.request.GET.get('next') or self.request.POST.get('next') or ''
         return ctxt
 
 
@@ -74,12 +74,8 @@ class SignupFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
         email = form.cleaned_data.get('email').lower()
         password = form.cleaned_data.get('password')
 
-        # Check that email does not exist on system
-        try:
-            user = create_email_user(email, password)
-        except UserAlreadyExists:
-            messages.error(self.request, _("This email already exists on our systems"))
-            return redirect('signup')
+        # Create new user
+        user = create_email_user(email, password)
 
         # Set full name
         user.name = full_name
@@ -98,24 +94,11 @@ class LoginFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
     success_url = getattr(settings, 'BASE_ACCOUNTS_LOGIN_REDIRECT_URL', settings.LOGIN_REDIRECT_URL)
     success_message = _("You have logged in")
 
-    def form_valid(self, form):
-        email = form.cleaned_data.get('email').lower()
-        password = form.cleaned_data.get('password')
-
-        # Check that email and password match and user is active
-        if email and password:
-            user = authenticate(email=email, password=password)
-            if user is None:
-                messages.error(self.request, _("Please insert both valid email and password"))
-                return redirect('login')
-            elif not user.is_active:
-                messages.error(self.request, _("Your account is inactive"))
-                return redirect('login')
-
-        # Login user
-        login(self.request, user)
-
-        return super(LoginFormView, self).form_valid(form)
+    def get_form_kwargs(self):
+        """Form uses request to login"""
+        kwargs = super(LoginFormView, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
 
 
 class UpdateEmailFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, FormView):
