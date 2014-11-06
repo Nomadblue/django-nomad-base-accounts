@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django.views.generic import View, FormView
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import login, logout
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.utils.timezone import now
@@ -12,7 +12,6 @@ from django.core.urlresolvers import reverse_lazy
 from django.contrib.auth import get_user_model
 
 from base_accounts.forms import SignupForm, LoginForm, UpdateEmailForm, UpdatePasswordForm
-from base_accounts.utils import create_email_user
 
 
 from django.contrib import messages
@@ -69,22 +68,14 @@ class SignupFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
     success_url = getattr(settings, 'BASE_ACCOUNTS_SIGNUP_REDIRECT_URL', settings.LOGIN_REDIRECT_URL)
     success_message = _("Welcome!")
 
+    def get_form_kwargs(self):
+        """Form uses request to signup"""
+        kwargs = super(SignupFormView, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
+
     def form_valid(self, form):
-        full_name = form.cleaned_data.get('full_name').lower()
-        email = form.cleaned_data.get('email').lower()
-        password = form.cleaned_data.get('password')
-
-        # Create new user
-        user = create_email_user(email, password)
-
-        # Set full name
-        user.name = full_name
-        user.save(update_fields=['name'])
-
-        # Login user
-        user = authenticate(username=user.username, password=password)
-        login(self.request, user)
-
+        form.save()
         return super(SignupFormView, self).form_valid(form)
 
 

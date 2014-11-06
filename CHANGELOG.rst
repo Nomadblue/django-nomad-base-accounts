@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+Version 2.3.2
+=============
+
+* Forms now can override user model and pass it to utils.create_email_user
+* Some code cleanup at utils.py
+
 Version 2.3.1
 =============
 
