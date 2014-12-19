@@ -132,7 +132,6 @@ class UpdatePasswordFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, For
     def form_valid(self, form):
         """Use model method to update new password"""
         self.request.user.set_password(form.cleaned_data['password1'])
-        self.request.user.save(update_fields=['password'])
         return super(UpdatePasswordFormView, self).form_valid(form)
 
 

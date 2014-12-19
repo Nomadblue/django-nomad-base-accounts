@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+Version 2.3.3
+=============
+
+* Fixed some bugs
+* Refactored some of signup form code into a mixin
+
 Version 2.3.2
 =============
 

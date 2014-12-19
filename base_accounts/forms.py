@@ -5,23 +5,17 @@ from django.utils.translation import ugettext_lazy as _
 from base_accounts.utils import create_email_user
 
 
-class SignupForm(forms.Form):
-    full_name = forms.CharField(label=_('full name'))
-    email = forms.EmailField(label=_('email'))
-    password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
-    tos = forms.BooleanField(label=_('I accept the terms of service'))
-    user_model = get_user_model()
-
-    def __init__(self, *args, **kwargs):
-        request = kwargs.pop('request', None)
-        self.request = request
-        return super(SignupForm, self).__init__(*args, **kwargs)
+class SignupFormMixin(object):
 
     def clean_email(self, *args, **kwargs):
         data = self.cleaned_data['email']
+        if self.clean_email_user_model:
+            model = self.clean_email_user_model
+        else:
+            model = self.user_model
         try:
-            self.user_model.objects.get(email=data)
-        except self.user_model.DoesNotExist:
+            model.objects.get(email=data)
+        except model.DoesNotExist:
             return data
         else:
             raise forms.ValidationError(_("Email is already being used by another user"))
@@ -43,6 +37,19 @@ class SignupForm(forms.Form):
         return user
 
 
+class SignupForm(SignupFormMixin, forms.Form):
+    full_name = forms.CharField(label=_('full name'))
+    email = forms.EmailField(label=_('email'))
+    password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
+    tos = forms.BooleanField(label=_('I accept the terms of service'))
+    user_model = get_user_model()
+
+    def __init__(self, *args, **kwargs):
+        request = kwargs.pop('request', None)
+        self.request = request
+        return super(SignupForm, self).__init__(*args, **kwargs)
+
+
 class LoginForm(forms.Form):
     email = forms.EmailField(label=_('email'))
     password = forms.CharField(label=_('password'), widget=forms.PasswordInput)
@@ -56,8 +63,8 @@ class LoginForm(forms.Form):
         cleaned_data = super(LoginForm, self).clean()
 
         # Check that email and password match and user is active
-        email = cleaned_data['email']
-        password = cleaned_data['password']
+        email = cleaned_data.get('email')
+        password = cleaned_data.get('password')
         user = authenticate(email=email, password=password)
         if user is None:
             raise forms.ValidationError(_("Please insert both valid email and password"))
