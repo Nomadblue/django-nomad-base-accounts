@@ -90,8 +90,3 @@ BASE_ACCOUNTS_UPDATE_PASSWORD_ERROR_REDIRECT_URL
 ------------------------------------------------
 
 * default: Reverse of ``settings_update_password`` view
-
-BASE_ACCOUNTS_CONFIRM_EMAIL_REDIRECT_URL
-------------------------------------------------
-
-* default: '/'

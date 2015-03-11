@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+Version 2.3.4
+=============
+
+* Added BASE_ACCOUNTS_CONFIRM_EMAIL_REDIRECT_URL setting
+
 Version 2.3.3
 =============
 

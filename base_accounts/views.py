@@ -163,6 +163,7 @@ class LogoutView(View):
 
 def confirm_email_address(request, token):
     """Confirms user's email address"""
+    success_url = getattr(settings, 'BASE_ACCOUNTS_CONFIRM_EMAIL_REDIRECT_URL', '/')
     try:
         pk = signing.loads(token, max_age=3600 * 48, salt='resend_email_confirmation')
     except signing.BadSignature:
@@ -184,7 +185,7 @@ def confirm_email_address(request, token):
 
     if user.is_active:
         messages.success(request, _('You have confirmed your email address'))
-        return redirect('settings_update_email')
+        return redirect(success_url)
     else:
         messages.success(request, _('Please confirm your email address'))
         return redirect('password_reset_recover')
