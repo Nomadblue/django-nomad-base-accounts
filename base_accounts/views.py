@@ -38,13 +38,22 @@ except:
 
 
 class ErrorMessageRedirectMixin(object):
-    """Redirect to error url if exists, converting form error strs to sys msgs"""
+    """Redirect to error url or next param if exists, converting form error strs to sys msgs"""
 
     def form_invalid(self, form):
-        if self.error_url:
+        error_url = None
+
+        if getattr(self, 'error_url', None):  # Error URL from object property
+            error_url = redirect(self.error_url)
+        elif self.request.POST.get('next'):  # Error URL contains a next param
+            error_url = redirect("%s?next=%s" % (reverse_lazy('login'), self.request.POST.get('next')))
+
+        # If error url, convert form errors to sys msgs and redirect
+        if error_url:
             for msg in form.errors.values():
                 messages.error(self.request, _(msg[0]))
-            return redirect(self.error_url)
+            return error_url
+
         return super(ErrorMessageRedirectMixin, self).form_invalid(form)
 
 
@@ -79,7 +88,7 @@ class SignupFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
         return super(SignupFormView, self).form_valid(form)
 
 
-class LoginFormView(SuccessMessageMixin, NextRedirectMixin, FormView):
+class LoginFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, NextRedirectMixin, FormView):
     form_class = LoginForm
     template_name = 'base_accounts/login.html'
     success_url = getattr(settings, 'BASE_ACCOUNTS_LOGIN_REDIRECT_URL', settings.LOGIN_REDIRECT_URL)
@@ -153,6 +162,7 @@ class LogoutView(View):
     success_url = getattr(settings, 'BASE_ACCOUNTS_LOGOUT_REDIRECT_URL', '/')
 
     def dispatch(self, request, *args, **kwargs):
+        list(messages.get_messages(request))  # Get rid of messages
         user = request.user
         if user.first_login:
             user.first_login = False
