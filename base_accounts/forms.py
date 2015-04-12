@@ -62,9 +62,15 @@ class LoginForm(forms.Form):
     def clean(self, *args, **kwargs):
         cleaned_data = super(LoginForm, self).clean()
 
-        # Check that email and password match and user is active
+        # Get data
         email = cleaned_data.get('email')
         password = cleaned_data.get('password')
+
+        # Return empty cleaned data so form.is_valid() will be False
+        if email is None or password is None:
+            return cleaned_data
+
+        # Check that email and password match and user is active
         user = authenticate(email=email, password=password)
         if user is None:
             raise forms.ValidationError(_("Please insert both valid email and password"))

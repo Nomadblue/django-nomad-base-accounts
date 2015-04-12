@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+Version 2.3.5
+=============
+
+* Fixed bug in login form clean method causing server error when
+  empty fields were posted
+
 Version 2.3.4
 =============
 
