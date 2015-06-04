@@ -43,7 +43,7 @@ setup(
     url='https://github.com/Nomadblue/django-nomad-base-accounts',
     download_url="https://github.com/Nomadblue/django-nomad-base-accounts/archive/v%s.zip" % version_num,
     packages=packages,
-    package_data={'base_accounts': ['templates/base_accounts/*']},  # Include templates and statics here
+    package_data={'base_accounts': ['templates/base_accounts/*', 'locale/es/LC_MESSAGES/*']},  # Include templates and statics here
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

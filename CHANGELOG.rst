@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+Version 2.3.6
+=============
+
+* Added missing locale files to setup.py
+
 Version 2.3.5
 =============
 
