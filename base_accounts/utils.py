@@ -26,7 +26,8 @@ def create_email_user(email, password, user_model=get_user_model(), **extrafield
     try:
         user_model.objects.get(email__iexact=email.lower())
     except user_model.DoesNotExist:
-        obj_count = user_model.objects.count()
+        base_user = get_user_model()  # Make sure to count User, not inheriting models
+        obj_count = base_user.objects.count()
         username = unique_username(email, obj_count)
         user = user_model.objects.create_user(username, email, password, **extrafields)
         return user

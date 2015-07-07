@@ -23,13 +23,6 @@ class BaseUser(AbstractUser):
         if not self.id:
             self.slug = slugify(self.username)
 
-        # Assign ``AbstractUser.username`` as ``BaseUser.name`` if empty
-        if not self.name.strip():
-            if not self.first_name:
-                self.first_name = self.username
-            name = "%s %s" % (self.first_name, self.last_name)
-            self.name = name.strip()
-
         super(BaseUser, self).save(*args, **kwargs)
 
     def get_display_name(self):

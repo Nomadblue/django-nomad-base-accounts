@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+Version 2.3.7
+=============
+
+* Make sure to count User when generation appended num to user
+* Do not use username as name when name is not provided
+
 Version 2.3.6
 =============
 
