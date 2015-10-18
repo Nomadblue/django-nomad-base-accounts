@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+Version 2.3.8
+=============
+
+* Fix logout after pwd change view in Django 1.7
+
 Version 2.3.7
 =============
 
