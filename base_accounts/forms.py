@@ -117,7 +117,3 @@ class UpdatePasswordForm(forms.Form):
         if not password1 == password2:
             raise forms.ValidationError(_("Passwords didn't match"))
         return password2
-
-    def save(self):
-        self.user.set_password(self.cleaned_data['password1'])
-        self.user_model.objects.filter(pk=self.user.pk).update(password=self.user.password)

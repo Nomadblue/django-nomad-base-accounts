@@ -141,6 +141,12 @@ class UpdatePasswordFormView(SuccessMessageMixin, ErrorMessageRedirectMixin, For
     def form_valid(self, form):
         """Use model method to update new password"""
         self.request.user.set_password(form.cleaned_data['password1'])
+        self.request.user.save()
+        # Django >= 1.7 requires this call to stay logged in.
+        # More info: https://docs.djangoproject.com/en/1.7/topics/auth/default/#session-invalidation-on-password-change
+        from django.contrib import auth
+        if hasattr(auth, 'update_session_auth_hash'):
+            auth.update_session_auth_hash(self.request, self.request.user)
         return super(UpdatePasswordFormView, self).form_valid(form)
 
 
