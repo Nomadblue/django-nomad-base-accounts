@@ -17,7 +17,12 @@ Add also to your ``urls.py``::
 User subclass
 =============
 
-Class ``BaseUser``, which subclasses ``django.contrib.auth.models.AbstractUser``, is itself abstract. Therefore, you must subclass ``BaseUser`` from another class of yours. This allows you to add extra funtionality, include mixins, override methods, or any other stuff you need. For example, we usually create an ``accounts`` app inside our project, and from a ``models.py``::
+Class ``BaseUser``, which subclasses
+``django.contrib.auth.models.AbstractUser``, is itself abstract. Therefore, you
+must subclass ``BaseUser`` from another class of yours. This allows you to add
+extra funtionality, include mixins, override methods, or any other stuff you
+need. For example, we usually create an ``accounts`` app inside our project,
+and from a ``models.py``::
 
     from django.db import models
     from base_accounts.models import BaseUser
@@ -34,7 +39,8 @@ Do not forget to include your new app into your ``INSTALLED_APPS``::
         ...
     )
 
-Now tell your project that this will be your auth model, and include the backend for authentication::
+Now tell your project that this will be your auth model, and include the
+backend for authentication::
 
     AUTH_USER_MODEL = 'accounts.User'
     AUTHENTICATION_BACKENDS = (
@@ -54,22 +60,26 @@ Optional settings
 BASE_ACCOUNTS_SIGNUP_REDIRECT_URL
 ---------------------------------
 
-* default: ``settings.LOGIN_REDIRECT_URL`` (if not set, '/accounts/profile/' in Django by default)
+* default: ``settings.LOGIN_REDIRECT_URL`` (if not set, '/accounts/profile/' in
+  Django by default)
 
 BASE_ACCOUNTS_LOGIN_REDIRECT_URL
 --------------------------------
 
-* default: ``settings.LOGIN_REDIRECT_URL`` (if not set, '/accounts/profile/' in Django by default)
+* default: ``settings.LOGIN_REDIRECT_URL`` (if not set, '/accounts/profile/' in
+  Django by default)
 
 BASE_ACCOUNTS_POST_LOGIN_REDIRECT_URL
 -------------------------------------
 
-* default: ``settings.LOGIN_REDIRECT_URL`` (if not set, '/accounts/profile/' in Django by default)
+* default: ``settings.LOGIN_REDIRECT_URL`` (if not set, '/accounts/profile/' in
+  Django by default)
 
 BASE_ACCOUNTS_LOGOUT_REDIRECT_URL
 ---------------------------------
 
-* default: ``settings.LOGOUT_URL`` (if not set, '/accounts/logout/' in Django by default)
+* default: ``settings.LOGOUT_URL`` (if not set, '/accounts/logout/' in Django
+  by default)
 
 BASE_ACCOUNTS_UPDATE_EMAIL_REDIRECT_URL
 ---------------------------------------
