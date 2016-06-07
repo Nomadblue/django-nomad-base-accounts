@@ -8,15 +8,21 @@ from base_accounts.utils import create_email_user
 class SignupFormMixin(object):
 
     def clean_email(self, *args, **kwargs):
-        data = self.cleaned_data['email']
+
+        # Get lowercase email
+        email = self.cleaned_data.get('email').lower()
+
+        # Get auth model
         if self.clean_email_user_model:
             model = self.clean_email_user_model
         else:
             model = self.user_model
+
+        # Check if email is already being used
         try:
-            model.objects.get(email=data)
+            model.objects.get(email=email)
         except model.DoesNotExist:
-            return data
+            return email
         else:
             raise forms.ValidationError(_("Email is already being used by another user"))
 

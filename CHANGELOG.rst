@@ -2,6 +2,12 @@
 CHANGELOG
 =========
 
+Version 2.3.9
+=============
+
+* Fix email verification in registration form - duplicate email
+  check is no longer case sensitive.
+
 Version 2.3.8
 =============
 
