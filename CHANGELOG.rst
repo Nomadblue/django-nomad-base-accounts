@@ -2,6 +2,11 @@
 CHANGELOG
 =========
 
+Version 2.3.10
+=============
+
+* Modify logout view to update first_login only if exists.
+
 Version 2.3.9
 =============
 
