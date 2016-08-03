@@ -170,7 +170,7 @@ class LogoutView(View):
     def dispatch(self, request, *args, **kwargs):
         list(messages.get_messages(request))  # Get rid of messages
         user = request.user
-        if user.first_login:
+        if hasattr(user, 'first_login') and user.first_login:
             user.first_login = False
             user.save(update_fields=['first_login'])
         logout(request)
